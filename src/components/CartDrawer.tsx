@@ -9,18 +9,53 @@ import {
 } from '@/components/ui/sheet'
 import { useCart } from '@/store/cart'
 import { formatPrice } from '@/data/products'
+import { sendOrderToTelegram, telegramConfigured } from '@/config/telegram'
+
+const esc = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
 export default function CartDrawer() {
   const { items, isOpen, setOpen, setQty, remove, total, promoApplied, applyPromo, clear } = useCart()
   const [promo, setPromo] = useState('')
   const [promoError, setPromoError] = useState(false)
   const [ordered, setOrdered] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', comment: '' })
 
-  const submitOrder = (e: React.FormEvent) => {
+  const submitOrder = async (e: React.FormEvent) => {
     e.preventDefault()
-    setOrdered(true)
-    clear()
+    setSendError(false)
+
+    const lines = items.map(
+      (x) => `— ${x.product.name}, размер ${x.size} ×${x.qty} — ${formatPrice(x.product.price * x.qty)}`,
+    )
+    const text =
+      `<b>🛍 Новый заказ ФОРМА</b>\n\n` +
+      lines.join('\n') +
+      (promoApplied ? `\n\nПромокод ФОРМА10 (−10%)` : '') +
+      `\n<b>Итого: ${formatPrice(total)}</b>\n\n` +
+      `<b>Имя:</b> ${esc(form.name)}\n` +
+      `<b>Телефон:</b> ${esc(form.phone)}` +
+      (form.comment.trim() ? `\n<b>Комментарий:</b> ${esc(form.comment)}` : '')
+
+    if (!telegramConfigured()) {
+      // бот ещё не подключён — демо-режим
+      setOrdered(true)
+      clear()
+      return
+    }
+
+    setSending(true)
+    const ok = await sendOrderToTelegram(text)
+    setSending(false)
+    if (ok) {
+      setOrdered(true)
+      setForm({ name: '', phone: '', comment: '' })
+      clear()
+    } else {
+      setSendError(true)
+    }
   }
 
   const tryPromo = () => {
@@ -181,10 +216,16 @@ export default function CartDrawer() {
               </div>
               <button
                 type="submit"
-                className="btn-tactile mt-4 w-full bg-[hsl(var(--accent))] py-4 font-display text-sm font-extrabold uppercase tracking-[0.2em] text-black"
+                disabled={sending}
+                className="btn-tactile mt-4 w-full bg-[hsl(var(--accent))] py-4 font-display text-sm font-extrabold uppercase tracking-[0.2em] text-black disabled:opacity-60"
               >
-                Купить · {formatPrice(total)}
+                {sending ? 'Отправляю…' : `Купить · ${formatPrice(total)}`}
               </button>
+              {sendError && (
+                <p className="mt-2 text-center text-xs text-destructive">
+                  Не получилось отправить заказ. Попробуйте ещё раз или напишите нам в Telegram.
+                </p>
+              )}
               {promoApplied && (
                 <p className="mt-2 text-center text-[10px] uppercase tracking-widest text-muted-foreground">
                   цена со скидкой 10%
