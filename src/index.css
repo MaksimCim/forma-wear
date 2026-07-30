@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 5.5%;
+    --foreground: 60 9% 93%;
+    --card: 0 0% 8%;
+    --card-foreground: 60 9% 93%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 60 9% 93%;
+    --primary: 60 9% 93%;
+    --primary-foreground: 0 0% 5.5%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 60 9% 93%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 72 100% 55%;
+    --accent-foreground: 0 0% 5.5%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 18%;
+    --input: 0 0% 20%;
+    --ring: 72 100% 55%;
+    --radius: 0.25rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    overflow-x: hidden;
+  }
+  ::selection {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+}
+
+/* плёночное зерно поверх всего сайта */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 90;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 0.9s steps(4) infinite;
+}
+
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, 3%); }
+  50% { transform: translate(3%, -2%); }
+  75% { transform: translate(-3%, -3%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* бегущая строка */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+}
+.animate-marquee-slow {
+  animation: marquee 46s linear infinite;
+}
+
+/* контурный текст */
+.text-outline {
+  -webkit-text-stroke: 1.5px hsl(var(--foreground));
+  color: transparent;
+}
+.text-outline-accent {
+  -webkit-text-stroke: 1.5px hsl(var(--accent));
+  color: transparent;
+}
+
+/* тактильная кнопка */
+.btn-tactile {
+  transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s, color 0.2s;
+}
+.btn-tactile:hover {
+  transform: scale(1.04) rotate(-1deg);
+}
+.btn-tactile:active {
+  transform: scale(0.96);
+}
+
+/* карточка товара */
+.card-img {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s;
+}
+.group:hover .card-img {
+  transform: scale(1.06) rotate(0.5deg);
+  filter: contrast(1.05);
+}
+
+/* появление секций при скролле */
+.reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
