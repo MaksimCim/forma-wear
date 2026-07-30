@@ -6,8 +6,8 @@
  * хостинга. Бот умеет только писать вам в чат, так что максимум вреда —
  * спам в этот чат. Не используйте токен основного бота с широкими правами.
  */
-export const TELEGRAM_BOT_TOKEN = ''
-export const TELEGRAM_CHAT_ID = ''
+export const TELEGRAM_BOT_TOKEN = '8010863329:AAE5f_FtF7wKOAyRs-JAQIxeUDBX91ikBU4'
+export const TELEGRAM_CHAT_ID = '334537290'
 
 export function telegramConfigured() {
   return TELEGRAM_BOT_TOKEN.length > 10 && TELEGRAM_CHAT_ID.length > 0
